@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
 import { TFLintResult, TFLintIssue } from '../models/tflint';
 
-export function publish(collection: vscode.DiagnosticCollection, document: vscode.TextDocument, result: TFLintResult) {
+export function publish(collection: vscode.DiagnosticCollection, result: TFLintResult) {
 
-    console.log("[TFLint] publishDiagnostics called with output:", result);
     console.log(`[TFLint] Found ${result.issues.length} issues`);
     var diagnosticsByFile: Record<string, vscode.Diagnostic[]> = {};
     result.issues.forEach((issue: TFLintIssue) => {
@@ -25,7 +24,6 @@ export function publish(collection: vscode.DiagnosticCollection, document: vscod
             severity = vscode.DiagnosticSeverity.Warning;
         }
 
-
         const diag = new vscode.Diagnostic(
             range,
             issue.message,
@@ -35,7 +33,6 @@ export function publish(collection: vscode.DiagnosticCollection, document: vscod
         diag.code = issue.rule.name;
         diag.source = "tflint-vscode";
         issue.range.filename = "/" + issue.range.filename;
-        console.log("[TFLint] fileName:", issue.range.filename);
 
         if (!diagnosticsByFile[issue.range.filename]) {
             diagnosticsByFile[issue.range.filename] = [];
@@ -44,9 +41,6 @@ export function publish(collection: vscode.DiagnosticCollection, document: vscod
     });
 
     for (var key in diagnosticsByFile) {
-        const uri = vscode.Uri.file(key);
-        console.log("uri:", uri);
-        console.log(diagnosticsByFile[key]);
-        collection.set(uri, diagnosticsByFile[key]);
+        collection.set(vscode.Uri.file(key), diagnosticsByFile[key]);
     }
 };
