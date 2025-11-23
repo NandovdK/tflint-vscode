@@ -1,9 +1,12 @@
 import * as vscode from 'vscode';
 import { TFLintResult, TFLintIssue } from '../models/tflint';
+import { log } from './logger';
 
 export function publish(collection: vscode.DiagnosticCollection, result: TFLintResult) {
 
     console.log(`[TFLint] Found ${result.issues.length} issues`);
+
+    log(`Found ${result.issues.length} issues`);
     var diagnosticsByFile: Record<string, vscode.Diagnostic[]> = {};
     result.issues.forEach((issue: TFLintIssue) => {
 

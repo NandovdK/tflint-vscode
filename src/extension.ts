@@ -1,14 +1,16 @@
 import * as vscode from 'vscode';
 import * as linter from './modules/linter';
 import * as diagnostics from './modules/diagnostics';
+import { log } from './modules/logger';
 
-const collection = vscode.languages.createDiagnosticCollection("tflint");
+const collection = vscode.languages.createDiagnosticCollection("TFLint");
 
 export async function activate(context: vscode.ExtensionContext) {
     linter.loadConfig().then(async () => {
         const workspace = vscode.workspace.workspaceFolders;
         if (workspace !== undefined) {
             console.log("[TFLint]: linting project on startup");
+            log("linting project on startup");
             await lintOnPath(workspace[0].uri.path);
         }
 
@@ -20,6 +22,7 @@ export async function activate(context: vscode.ExtensionContext) {
             return;
         }
 
+        collection.set(document.uri, []);
         await lintOnFile(document);
     });
 
@@ -52,6 +55,7 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 async function lintOnPath(pathToLint: string, withFix: boolean = false) {
     console.log("[TFLint]: Path to lint:" + pathToLint);
+
     const result = await linter.run(pathToLint, withFix);
     diagnostics.publish(collection, result);
 

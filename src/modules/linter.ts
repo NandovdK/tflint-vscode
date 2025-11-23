@@ -1,8 +1,10 @@
 import { exec } from 'child_process';
 import * as vscode from 'vscode';
 import { TFLintResult } from '../models/tflint';
+import { log } from './logger';
 
 var tfLintConfigFilePath: string | null = null;
+
 
 export async function run(pathToLint: string, fix: boolean): Promise<TFLintResult> {
     const extraOptions: string[] = [];
@@ -49,6 +51,7 @@ export async function loadConfig() {
 
     if (files.length === 1) {
         console.log("[TFLint]: Found config file at", files[0].path);
+        log(`Found config file at ${files[0].path}`);
         tfLintConfigFilePath = files[0].path;
         return;
     }
