@@ -4,12 +4,12 @@ import * as diagnostics from './modules/diagnostics';
 
 const collection = vscode.languages.createDiagnosticCollection("tflint");
 
-export function activate(context: vscode.ExtensionContext) {
-    linter.loadConfig().then(() => {
+export async function activate(context: vscode.ExtensionContext) {
+    linter.loadConfig().then(async () => {
         const workspace = vscode.workspace.workspaceFolders;
         if (workspace !== undefined) {
             console.log("[TFLint]: linting project on startup");
-            lintOnPath(workspace[0].uri.path);
+            await lintOnPath(workspace[0].uri.path);
         }
 
     });
@@ -25,25 +25,25 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(onSave);
 
-    let lintCommand = vscode.commands.registerCommand("extension.lint", () => {
+    let lintCommand = vscode.commands.registerCommand("extension.lint", async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             return;
         }
 
-        lintOnFile(editor.document);
+        await lintOnFile(editor.document);
     }
     );
 
     context.subscriptions.push(lintCommand);
 
-    let lintWithFixCommand = vscode.commands.registerCommand("extension.lint-fix", () => {
+    let lintWithFixCommand = vscode.commands.registerCommand("extension.lint-fix", async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             return;
         }
 
-        lintOnFile(editor.document, true);
+        await lintOnFile(editor.document, true);
     }
     );
 
