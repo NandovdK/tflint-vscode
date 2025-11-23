@@ -5,17 +5,29 @@ import * as diagnostics from './modules/diagnostics';
 const collection = vscode.languages.createDiagnosticCollection("tflint");
 
 export function activate(context: vscode.ExtensionContext) {
+    linter.loadConfig().then(() => {
+        const workspace = vscode.workspace.workspaceFolders;
+        if (workspace !== undefined) {
+            console.log("[TFLint]: linting project on startup");
+            lintOnPath(workspace[0].uri.path);
+        }
 
-    const workspace = vscode.workspace.workspaceFolders;
-    if (workspace !== undefined) {
-        console.log("[TFLint]: linting project on startup");
-        lintOnPath(workspace[0].uri.path);
-    }
+    });
 
-    let disposable = vscode.commands.registerCommand("extension.lint", () => {
+
+    const onSave = vscode.workspace.onDidSaveTextDocument(async (document) => {
+        if (!document.fileName.endsWith(".tf")) {
+            return;
+        }
+
+        await lintOnFile(document);
+    });
+
+    context.subscriptions.push(onSave);
+
+    let lintCommand = vscode.commands.registerCommand("extension.lint", () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
-            console.log("no editor");
             return;
         }
 
@@ -23,15 +35,28 @@ export function activate(context: vscode.ExtensionContext) {
     }
     );
 
-    context.subscriptions.push(disposable);
+    context.subscriptions.push(lintCommand);
+
+    let lintWithFixCommand = vscode.commands.registerCommand("extension.lint-fix", () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            return;
+        }
+
+        lintOnFile(editor.document, true);
+    }
+    );
+
+    context.subscriptions.push(lintWithFixCommand);
+
 }
-async function lintOnPath(pathToLint: string) {
+async function lintOnPath(pathToLint: string, withFix: boolean = false) {
     console.log("[TFLint]: Path to lint:" + pathToLint);
-    const result = await linter.run(pathToLint);
+    const result = await linter.run(pathToLint, withFix);
     diagnostics.publish(collection, result);
 
 }
-async function lintOnFile(document: vscode.TextDocument) {
+async function lintOnFile(document: vscode.TextDocument, withFix: boolean = false) {
 
     const workspace = vscode.workspace.getWorkspaceFolder(document.uri);
     if (workspace === undefined) {
@@ -39,9 +64,7 @@ async function lintOnFile(document: vscode.TextDocument) {
     }
     const pathToLint = workspace.uri.path;
 
-    console.log("[TFLint]: Path to lint:" + pathToLint);
-    const result = await linter.run(pathToLint);
-    diagnostics.publish(collection, result);
+    await lintOnPath(pathToLint, withFix);
 }
 
 // This method is called when your extension is deactivated

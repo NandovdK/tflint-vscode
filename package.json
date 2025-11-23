@@ -28,6 +28,10 @@
       {
         "command": "extension.lint",
         "title": "tflint-vscode: lint"
+      },
+      {
+        "command": "extension.lint-fix",
+        "title": "tflint-vscode: lint --fix"
       }
     ]
   },
