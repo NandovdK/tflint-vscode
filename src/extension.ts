@@ -9,7 +9,6 @@ export async function activate(context: vscode.ExtensionContext) {
     linter.loadConfig().then(async () => {
         const workspace = vscode.workspace.workspaceFolders;
         if (workspace !== undefined) {
-            console.log("[TFLint]: linting project on startup");
             log("linting project on startup");
             await lintOnPath(workspace[0].uri.path);
         }
@@ -54,7 +53,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 }
 async function lintOnPath(pathToLint: string, withFix: boolean = false) {
-    console.log("[TFLint]: Path to lint:" + pathToLint);
+    log("Path to lint:" + pathToLint);
 
     const result = await linter.run(pathToLint, withFix);
     diagnostics.publish(collection, result);

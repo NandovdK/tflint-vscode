@@ -2,7 +2,7 @@
   "name": "tflint-vscode",
   "displayName": "tflint-vscode",
   "description": "Adds TFLint support to VS Code by running TFLint, parsing its results, and displaying diagnostics for Terraform files.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "publisher": "NandovdK",
   "repository": "https://github.com/NandovdK/tflint-vscode",
   "engines": {
@@ -17,6 +17,17 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "TFLint",
+      "properties": {
+        "tflint-vscode.configFile": {
+          "type": "string",
+          "default": "",
+          "description": "Optional path to a .tflint.hcl file for this workspace. Leave empty to auto-detect."
+        }
+      }
+    },
     "languages": [
       {
         "id": "terraform",

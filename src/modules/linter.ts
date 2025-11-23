@@ -1,5 +1,6 @@
 import { exec } from 'child_process';
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { TFLintResult } from '../models/tflint';
 import { log } from './logger';
 
@@ -27,6 +28,7 @@ export async function run(pathToLint: string, fix: boolean): Promise<TFLintResul
             ...extraOptions
         ].join(" ");
 
+        log(`Executing cmd: ${cmd}`);
         exec(cmd, (err, stdout, stderr) => {
 
             if (err) {
@@ -47,14 +49,30 @@ export async function run(pathToLint: string, fix: boolean): Promise<TFLintResul
 
 // should be an optional setting in settings.json
 export async function loadConfig() {
-    const files = await vscode.workspace.findFiles("**/.tflint.hcl", null, 1);
+    const config = vscode.workspace.getConfiguration("tflint-vscode");
+    let configFile = config.get<string>("configFile") || null;
+
+    if (configFile) {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+            console.warn("[TFLint] No workspace folder found");
+            return null;
+        }
+
+        const rootPath = workspaceFolders[0].uri.fsPath;
+        const fullPath = path.isAbsolute(configFile) ? configFile : path.join(rootPath, configFile);
+        tfLintConfigFilePath = fullPath;
+
+        log(`Found config file: ${fullPath}`);
+        return;
+    }
+    const files = await vscode.workspace.findFiles("**/.tflint.hcl", "**/.terraform/**", 1);
 
     if (files.length === 1) {
-        console.log("[TFLint]: Found config file at", files[0].path);
         log(`Found config file at ${files[0].path}`);
         tfLintConfigFilePath = files[0].path;
         return;
     }
-    console.log("[TFLint]: Could not find .tflint.hcl file in current workspace");
+    log("Could not find .tflint.hcl file in current workspace");
     tfLintConfigFilePath = null;
 }
