@@ -37,7 +37,6 @@ export function publish(collection: vscode.DiagnosticCollection, result: TFLintR
         issue.range.filename = "/" + issue.range.filename;
 
         if (!diagnosticsByFile[issue.range.filename]) {
-            logger.trace(`Publishig diagnostics for: ${issue.range.filename}`);
             diagnosticsByFile[issue.range.filename] = [];
         }
         diagnosticsByFile[issue.range.filename].push(diag);
