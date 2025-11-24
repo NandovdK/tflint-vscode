@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as linter from './modules/linter';
 import * as diagnostics from './modules/diagnostics';
 import { log } from './modules/logger';
+import  path  from 'path';
 
 const collection = vscode.languages.createDiagnosticCollection("TFLint");
 
@@ -33,7 +34,11 @@ export async function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        await lintOnFile(editor.document);
+        await lintOnFile(editor.document).then(() => {
+            vscode.window.showInformationMessage("TFLint: Project linted");
+        }
+        );
+
     }
     );
 
@@ -45,7 +50,9 @@ export async function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        await lintOnFile(editor.document, true);
+        await lintOnFile(editor.document, true).then(() => {
+            vscode.window.showInformationMessage("TFLint: Project linted & auto fix");
+        });
     }
     );
 
@@ -61,11 +68,7 @@ async function lintOnPath(pathToLint: string, withFix: boolean = false) {
 }
 async function lintOnFile(document: vscode.TextDocument, withFix: boolean = false) {
 
-    const workspace = vscode.workspace.getWorkspaceFolder(document.uri);
-    if (workspace === undefined) {
-        return;
-    }
-    const pathToLint = workspace.uri.path;
+    const pathToLint = path.dirname(document.uri.path);
 
     await lintOnPath(pathToLint, withFix);
 }

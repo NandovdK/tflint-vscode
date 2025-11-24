@@ -55,7 +55,7 @@ export async function loadConfig() {
     if (configFile) {
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders || workspaceFolders.length === 0) {
-            console.warn("[TFLint] No workspace folder found");
+            log("[TFLint] No workspace folder found");
             return null;
         }
 

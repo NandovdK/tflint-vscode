@@ -40,11 +40,11 @@
     "commands": [
       {
         "command": "extension.lint",
-        "title": "tflint-vscode: lint"
+        "title": "TFLint: Lint project"
       },
       {
         "command": "extension.lint-fix",
-        "title": "tflint-vscode: lint --fix"
+        "title": "TFLint: Lint project & auto fix issues if possible"
       }
     ]
   },
