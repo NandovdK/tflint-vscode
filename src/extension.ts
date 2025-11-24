@@ -2,18 +2,21 @@ import * as vscode from 'vscode';
 import * as linter from './modules/linter';
 import * as diagnostics from './modules/diagnostics';
 import { log } from './modules/logger';
-import  path  from 'path';
+import { loadConfig, ExtensionConfiguration } from './settings';
+import { getProjectRoot } from './helpers/vscode';
+
+import path from 'path';
 
 const collection = vscode.languages.createDiagnosticCollection("TFLint");
+let initConfig: ExtensionConfiguration;
 
 export async function activate(context: vscode.ExtensionContext) {
-    linter.loadConfig().then(async () => {
-        const workspace = vscode.workspace.workspaceFolders;
-        if (workspace !== undefined) {
-            log("linting project on startup");
-            await lintOnPath(workspace[0].uri.path);
+    loadConfig().then(async (config) => {
+        initConfig = config;
+        const projectPath = getProjectRoot();
+        if (projectPath) {
+            await lintOnPath(projectPath);
         }
-
     });
 
 
@@ -23,7 +26,7 @@ export async function activate(context: vscode.ExtensionContext) {
         }
 
         collection.set(document.uri, []);
-        await lintOnFile(document);
+        await lintOnFile(document, initConfig.fixOnSave);
     });
 
     context.subscriptions.push(onSave);
@@ -51,7 +54,7 @@ export async function activate(context: vscode.ExtensionContext) {
         }
 
         await lintOnFile(editor.document, true).then(() => {
-            vscode.window.showInformationMessage("TFLint: Project linted & auto fix");
+            vscode.window.showInformationMessage("TFLint: Project linted & auto fixed");
         });
     }
     );
@@ -61,15 +64,13 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 async function lintOnPath(pathToLint: string, withFix: boolean = false) {
     log("Path to lint:" + pathToLint);
-
-    const result = await linter.run(pathToLint, withFix);
+    log(`${withFix}`);
+    const result = await linter.run(initConfig, pathToLint, withFix);
     diagnostics.publish(collection, result);
 
 }
 async function lintOnFile(document: vscode.TextDocument, withFix: boolean = false) {
-
     const pathToLint = path.dirname(document.uri.path);
-
     await lintOnPath(pathToLint, withFix);
 }
 
