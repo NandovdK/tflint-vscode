@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import { TFLintResult } from '../models/tflint';
-import { log } from './logger';
+import { logger } from '../helpers/logger';
 import { ExtensionConfiguration } from '../settings';
 
 export async function run(config: ExtensionConfiguration, pathToLint: string, fix: boolean): Promise<TFLintResult> {
@@ -26,7 +26,7 @@ export async function run(config: ExtensionConfiguration, pathToLint: string, fi
             ...extraOptions
         ].join(" ");
 
-        log(`Executing cmd: ${cmd}`);
+        logger.debug(`Executing cmd: ${cmd}`);
         exec(cmd, (err, stdout, stderr) => {
 
             if (err) {

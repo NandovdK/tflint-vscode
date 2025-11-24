@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import { TFLintResult, TFLintIssue } from '../models/tflint';
-import { log } from './logger';
+import { logger } from '../helpers/logger';
 
 export function publish(collection: vscode.DiagnosticCollection, result: TFLintResult) {
 
 
-    log(`Found ${result.issues.length} issues`);
+    logger.debug(`Found ${result.issues.length} issues`);
     var diagnosticsByFile: Record<string, vscode.Diagnostic[]> = {};
     result.issues.forEach((issue: TFLintIssue) => {
 
@@ -37,6 +37,7 @@ export function publish(collection: vscode.DiagnosticCollection, result: TFLintR
         issue.range.filename = "/" + issue.range.filename;
 
         if (!diagnosticsByFile[issue.range.filename]) {
+            logger.trace(`Publishig diagnostics for: ${issue.range.filename}`);
             diagnosticsByFile[issue.range.filename] = [];
         }
         diagnosticsByFile[issue.range.filename].push(diag);

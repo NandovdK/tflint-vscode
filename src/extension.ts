@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as linter from './modules/linter';
 import * as diagnostics from './modules/diagnostics';
-import { log } from './modules/logger';
+import { logger } from './helpers/logger';
 import { loadConfig, ExtensionConfiguration } from './settings';
 import { getProjectRoot } from './helpers/vscode';
 
@@ -63,8 +63,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
 }
 async function lintOnPath(pathToLint: string, withFix: boolean = false) {
-    log("Path to lint:" + pathToLint);
-    log(`${withFix}`);
+    logger.debug("Path to lint:" + pathToLint);
+
     const result = await linter.run(initConfig, pathToLint, withFix);
     diagnostics.publish(collection, result);
 

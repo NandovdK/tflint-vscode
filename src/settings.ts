@@ -1,6 +1,5 @@
 import { config, searchFileInWorkspace } from './helpers/vscode';
 import { getAbsoluteFilePath } from './helpers/file';
-import { log } from './modules/logger';
 
 export interface ExtensionConfiguration {
     binPath?: string
