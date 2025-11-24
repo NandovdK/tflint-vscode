@@ -2,7 +2,6 @@ import * as util from "util";
 import * as vscode from 'vscode';
 
 
-
 class Logger {
     readonly channel = vscode.window.createOutputChannel("TFLint", { log: true });
 

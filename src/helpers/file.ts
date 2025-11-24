@@ -1,4 +1,5 @@
 import path from 'path';
+import * as fs from "fs";
 import * as vscode from 'vscode';
 import { logger } from '../helpers/logger';
 
@@ -13,4 +14,8 @@ export function getAbsoluteFilePath(filePath: string): string {
         return "";
     }
     return path.join(workspaceFolders[0].uri.fsPath, filePath);
+}
+
+export function checkIfFileExists(filePath: string): boolean {
+    return fs.existsSync(filePath);
 }

@@ -19,47 +19,54 @@ export async function activate(context: vscode.ExtensionContext) {
         }
     });
 
-
-    const onSave = vscode.workspace.onDidSaveTextDocument(async (document) => {
-        if (!document.fileName.endsWith(".tf")) {
-            return;
-        }
-
-        collection.set(document.uri, []);
-        await lintOnFile(document, initConfig.fixOnSave);
-    });
-
-    context.subscriptions.push(onSave);
-
-    let lintCommand = vscode.commands.registerCommand("extension.lint", async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            return;
-        }
-
-        await lintOnFile(editor.document).then(() => {
-            vscode.window.showInformationMessage("TFLint: Project linted");
-        }
-        );
-
-    }
+    context.subscriptions.push(
+        vscode.workspace.onDidChangeConfiguration((event) => {
+            if (event.affectsConfiguration("tflint-vscode")) {
+                vscode.window.showWarningMessage(
+                    "You should restart VS Code for configuration changes to take effect",
+                );
+            }
+        }),
     );
 
-    context.subscriptions.push(lintCommand);
+    context.subscriptions.push(
+        vscode.workspace.onDidSaveTextDocument(async (document) => {
+            if (!document.fileName.endsWith(".tf")) {
+                return;
+            }
 
-    let lintWithFixCommand = vscode.commands.registerCommand("extension.lint-fix", async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            return;
+            collection.set(document.uri, []);
+            await lintOnFile(document, initConfig.fixOnSave);
+        }));
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand("extension.lint", async () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                return;
+            }
+
+            await lintOnFile(editor.document).then(() => {
+                vscode.window.showInformationMessage("Project linted");
+            }
+            );
+
+        }));
+
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand("extension.lint-fix", async () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                return;
+            }
+
+            await lintOnFile(editor.document, true).then(() => {
+                vscode.window.showInformationMessage("Project linted & auto fixed");
+            });
         }
+        ));
 
-        await lintOnFile(editor.document, true).then(() => {
-            vscode.window.showInformationMessage("TFLint: Project linted & auto fixed");
-        });
-    }
-    );
-
-    context.subscriptions.push(lintWithFixCommand);
 
 }
 async function lintOnPath(pathToLint: string, withFix: boolean = false) {

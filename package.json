@@ -2,14 +2,23 @@
   "name": "tflint-vscode",
   "displayName": "tflint-vscode",
   "description": "Adds TFLint support to VS Code by running TFLint, parsing its results, and displaying diagnostics for Terraform files.",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "publisher": "NandovdK",
-  "repository": "https://github.com/NandovdK/tflint-vscode",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NandovdK/tflint-vscode"
+  },
   "engines": {
     "vscode": "^1.106.1"
   },
   "categories": [
-    "Other"
+    "Linters"
+  ],
+  "keywords": [
+    "linter",
+    "terraform",
+    "tflint"
   ],
   "activationEvents": [
     "onLanguage:terraform",
