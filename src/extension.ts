@@ -3,7 +3,7 @@ import * as linter from './modules/linter';
 import * as diagnostics from './modules/diagnostics';
 import { logger } from './helpers/logger';
 import { loadConfig, ExtensionConfiguration } from './settings';
-import { getProjectRoot } from './helpers/vscode';
+import { getAllWorkspacePaths } from './helpers/vscode';
 
 import path from 'path';
 
@@ -13,9 +13,11 @@ let initConfig: ExtensionConfiguration;
 export async function activate(context: vscode.ExtensionContext) {
     loadConfig().then(async (config) => {
         initConfig = config;
-        const projectPath = getProjectRoot();
-        if (projectPath) {
-            await lintOnPath(projectPath);
+        const workspaces = getAllWorkspacePaths();
+        if (workspaces.length > 0) {
+            for (var val of workspaces) {
+                await lintOnPath(val);
+            }
         }
     });
 
@@ -41,31 +43,27 @@ export async function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand("extension.lint", async () => {
-            const editor = vscode.window.activeTextEditor;
-            if (!editor) {
-                return;
+            const workspaces = getAllWorkspacePaths();
+            if (workspaces.length > 0) {
+                for (var val of workspaces) {
+                    await lintOnPath(val);
+                }
             }
-
-            await lintOnFile(editor.document).then(() => {
-                vscode.window.showInformationMessage("Project linted");
-            }
-            );
-
+            vscode.window.showInformationMessage("Project linted");
         }));
+
 
 
     context.subscriptions.push(
         vscode.commands.registerCommand("extension.lint-fix", async () => {
-            const editor = vscode.window.activeTextEditor;
-            if (!editor) {
-                return;
+            const workspaces = getAllWorkspacePaths();
+            if (workspaces.length > 0) {
+                for (var val of workspaces) {
+                    await lintOnPath(val, true);
+                }
             }
-
-            await lintOnFile(editor.document, true).then(() => {
-                vscode.window.showInformationMessage("Project linted & auto fixed");
-            });
-        }
-        ));
+            vscode.window.showInformationMessage("Project linted & auto fixed");
+        }));
 
 
 }

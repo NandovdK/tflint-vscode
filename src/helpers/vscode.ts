@@ -13,6 +13,17 @@ export function getProjectRoot(): (string | undefined) {
     return undefined;
 }
 
+export function getAllWorkspacePaths() {
+    const workspaces = vscode.workspace.workspaceFolders;
+    const result: string[] = [];
+    if (workspaces) {
+        for (var key in workspaces) {
+            result.push(workspaces[key].uri.path);
+        }
+    }
+    return result;
+}
+
 export async function searchFileInWorkspace(fileName: string): Promise<string | undefined> {
     const files = await vscode.workspace.findFiles(`**/${fileName}`, `**/.terraform/**`, 1);
 
