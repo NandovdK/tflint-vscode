@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { config, searchFileInWorkspace } from './helpers/vscode';
 import { getAbsoluteFilePath, checkIfFileExists } from './helpers/file';
+import { initialize } from './modules/linter';
 
 export interface ExtensionConfiguration {
     binPath?: string
@@ -8,9 +9,9 @@ export interface ExtensionConfiguration {
     fixOnSave: boolean
 }
 
-export async function loadConfig() {
+export async function loadConfig(): Promise<ExtensionConfiguration> {
     const workspace = config("tflint-vscode");
-    const binPath = workspace.get<string>("tfLintBinPath") || undefined;
+    const binPath = workspace.get<string>("tfLintBinPath") || "tflint";
     const fixOnSave = workspace.get<boolean>("fixOnSave") || false;
     let configFilePath = workspace.get<string>("configFile") || await searchFileInWorkspace(".tflint.hcl");
 
@@ -20,12 +21,6 @@ export async function loadConfig() {
         if (!checkIfFileExists(configFilePath)) {
             vscode.window.showErrorMessage(`Configured tflint config file could not be found at: ${configFilePath}`);
         }
-    } else {
-        vscode.window.showWarningMessage("Could not find tflint config file, please configure this for optimal performance: tflint-vscode.configFile");
-    }
-
-    if (binPath && !checkIfFileExists(binPath)) {
-        vscode.window.showErrorMessage(`Configured tflint bin could not be found at: ${configFilePath}`);
     }
 
     const configuration: ExtensionConfiguration = {
@@ -34,5 +29,15 @@ export async function loadConfig() {
         fixOnSave: fixOnSave
     };
 
-    return configuration;
+    if (!configFilePath) {
+        return configuration;
+    }
+    const result = await initialize(configuration);
+
+    if (!result) {
+        vscode.window.showErrorMessage("Unable to initialize tflint correctly. Please check logs for more information");
+        return configuration;
+    } else {
+        return configuration;
+    }
 }

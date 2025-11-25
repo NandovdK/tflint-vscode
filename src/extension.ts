@@ -1,13 +1,10 @@
 import * as vscode from 'vscode';
 import * as linter from './modules/linter';
-import * as diagnostics from './modules/diagnostics';
-import { logger } from './helpers/logger';
+import { diagnostics } from './modules/diagnostics';
 import { loadConfig, ExtensionConfiguration } from './settings';
 import { getAllWorkspacePaths } from './helpers/vscode';
-
 import path from 'path';
 
-const collection = vscode.languages.createDiagnosticCollection("TFLint");
 let initConfig: ExtensionConfiguration;
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -37,7 +34,7 @@ export async function activate(context: vscode.ExtensionContext) {
                 return;
             }
 
-            collection.set(document.uri, []);
+            diagnostics.collection.set(document.uri, []);
             await lintOnFile(document, initConfig.fixOnSave);
         }));
 
@@ -67,7 +64,7 @@ export async function activate(context: vscode.ExtensionContext) {
 async function lintOnPaths(pathsToLint: string[], withFix: boolean = false) {
     for (var pathToLint of pathsToLint) {
         const result = await linter.run(initConfig, pathToLint, withFix);
-        diagnostics.publish(collection, result);
+        diagnostics.publish(result);
     }
 
 }

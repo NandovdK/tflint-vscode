@@ -2,6 +2,7 @@ import { exec } from 'child_process';
 import { TFLintResult } from '../models/tflint';
 import { logger } from '../helpers/logger';
 import { ExtensionConfiguration } from '../settings';
+import { dirname } from 'path';
 
 export async function run(config: ExtensionConfiguration, pathToLint: string, fix: boolean): Promise<TFLintResult> {
     const extraOptions: string[] = [];
@@ -14,11 +15,10 @@ export async function run(config: ExtensionConfiguration, pathToLint: string, fi
         extraOptions.push("--fix");
     }
 
-    const binPath = config.binPath || "tflint";
     return new Promise((resolve, reject) => {
 
         const cmd = [
-            binPath,
+            config.binPath,
             `--chdir ${pathToLint}`,
             "--recursive",
             "--format json",
@@ -26,8 +26,8 @@ export async function run(config: ExtensionConfiguration, pathToLint: string, fi
             ...extraOptions
         ].join(" ");
 
-        logger.debug(`Executing cmd: ${cmd}`);
-        exec(cmd, (err, stdout, stderr) => {
+        logger.debug(`[TFLint]: Executing cmd: ${cmd}`);
+        exec(cmd, { maxBuffer: 10 * 1024 * 1024 }, (err, stdout, _) => {
 
             if (err) {
                 reject(err);
@@ -45,4 +45,24 @@ export async function run(config: ExtensionConfiguration, pathToLint: string, fi
     });
 }
 
+export async function initialize(config: ExtensionConfiguration): Promise<boolean> {
+    if (!config.configFilePath) {
+        return false;
+    }
+    const dir = dirname(config.configFilePath);
+    if (!dir) {
+        return false;
+    }
+    const cmd = `${config.binPath} --chdir ${dir} --init`;
+    logger.debug(`[TFLINT]: running cmd: ${cmd}`);
 
+    exec(cmd, (err, _, __) => {
+        if (err) {
+            logger.error("[TFLINT]: --init failed");
+            return false;
+        }
+    });
+
+    logger.debug("[TFLint]: --init success");
+    return true;
+}
