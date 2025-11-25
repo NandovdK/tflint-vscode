@@ -11,9 +11,7 @@ export async function activate(context: vscode.ExtensionContext) {
   await linter.init(config);
 
   const workspaces = getAllWorkspacePaths();
-  if (workspaces.length > 0) {
-    await lintOnPaths(workspaces);
-  }
+  await lintOnPaths(workspaces);
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(async (event) => {
@@ -39,9 +37,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("extension.lint", async () => {
       const workspaces = getAllWorkspacePaths();
-      if (workspaces.length > 0) {
-        await lintOnPaths(workspaces);
-      }
+      await lintOnPaths(workspaces);
       vscode.window.showInformationMessage("Project linted");
     }),
   );
@@ -49,9 +45,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("extension.lint-fix", async () => {
       const workspaces = getAllWorkspacePaths();
-      if (workspaces.length > 0) {
-        await lintOnPaths(workspaces, true);
-      }
+      await lintOnPaths(workspaces, true);
 
       vscode.window.showInformationMessage("Project linted & auto fixed");
     }),
@@ -74,4 +68,4 @@ async function lintOnFile(
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
