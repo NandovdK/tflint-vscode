@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 import { exec } from "child_process";
 import { TFLintResult } from "../models/tflint";
 import { logger } from "./logger";
@@ -6,6 +7,7 @@ import { dirname } from "path";
 
 class Linter {
   private config: ExtensionConfiguration | null = null;
+  private fileWatcher: vscode.FileSystemWatcher | null = null;
 
   async init(config: ExtensionConfiguration): Promise<void> {
     this.config = config;
@@ -21,19 +23,52 @@ class Linter {
       return;
     }
 
+    this.createFileWatcher();
+
     return new Promise((resolve, reject) => {
       const cmd = `${config.binPath} --chdir ${dir} --init`;
-      logger.debug(`Running tflint --init: ${cmd}`);
+      logger.debug(`Running cmd: ${cmd}`);
 
       exec(cmd, (err) => {
         if (err) {
-          logger.error("tflint --init failed");
+          logger.error(`tflint init error:`, err);
           reject(err);
           return;
         }
-        logger.debug("tflint --init success");
+        logger.debug("tflint init completed successfully");
         resolve();
       });
+    });
+  }
+
+  private createFileWatcher() {
+    if (!this.config?.configFilePath) {
+      return;
+    }
+
+    if (this.fileWatcher) {
+      this.fileWatcher.dispose();
+    }
+
+    logger.debug(`Creating file watcher for ${this.config.configFilePath}`);
+    const watcher = vscode.workspace.createFileSystemWatcher(this.config.configFilePath);
+    this.fileWatcher = watcher;
+
+    watcher.onDidChange(async () => {
+      logger.debug("TFLint config file changed, re-initializing...");
+      await this.init(this.config!);
+    });
+
+    watcher.onDidDelete(() => {
+      logger.debug("TFLint config file deleted");
+      this.config!.configFilePath = undefined;
+    });
+
+    // in the event that the config file is created again
+    watcher.onDidCreate(async (uri) => {
+      logger.debug("TFLint config file created, re-initializing...");
+      this.config!.configFilePath = uri.fsPath;
+      await this.init(this.config!);
     });
   }
 

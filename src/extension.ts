@@ -50,6 +50,14 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.window.showInformationMessage("Project linted & auto fixed");
     }),
   );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("extension.initialize", async () => {
+      linter.init(config);
+      vscode.window.showInformationMessage("TFLint Plugins initialized");
+    }),
+  );
+
 }
 
 async function lintOnPaths(pathsToLint: string[], withFix: boolean = false) {
