@@ -28,7 +28,10 @@ class DiagnosticsHandler {
 
       const diag = new vscode.Diagnostic(range, issue.message, severity);
 
-      diag.code = issue.rule.name;
+      diag.code = {
+        value: issue.rule.name,
+        target: vscode.Uri.parse(issue.rule.link),
+      };
       diag.source = "tflint-vscode";
       issue.range.filename = "/" + issue.range.filename;
 
