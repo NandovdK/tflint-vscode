@@ -6,7 +6,7 @@ class DiagnosticsHandler {
   public collection = vscode.languages.createDiagnosticCollection("TFLint");
 
   publish(result: TFLintResult) {
-    logger.debug(`Found ${result.issues.length} issues`);
+    logger.info(`Found ${result.issues.length} issues`);
     var diagnosticsByFile: Record<string, vscode.Diagnostic[]> = {};
     result.issues.forEach((issue: TFLintIssue) => {
       // Convert from 1-based to 0-based indexing

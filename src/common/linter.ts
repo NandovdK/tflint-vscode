@@ -19,7 +19,7 @@ class Linter {
 
     const dir = dirname(config.configFilePath);
     if (!dir) {
-      logger.debug("Invalid config directory, skipping tflint --init");
+      logger.warn("Invalid config directory, skipping tflint --init");
       return;
     }
 
@@ -27,7 +27,7 @@ class Linter {
 
     return new Promise((resolve, reject) => {
       const cmd = `${config.binPath} --chdir ${dir} --init`;
-      logger.debug(`Running cmd: ${cmd}`);
+      logger.info(`Running cmd: ${cmd}`);
 
       exec(cmd, (err) => {
         if (err) {
@@ -35,7 +35,7 @@ class Linter {
           reject(err);
           return;
         }
-        logger.debug("tflint init completed successfully");
+        logger.info("tflint init completed successfully");
         resolve();
       });
     });
@@ -55,18 +55,18 @@ class Linter {
     this.fileWatcher = watcher;
 
     watcher.onDidChange(async () => {
-      logger.debug("TFLint config file changed, re-initializing...");
+      logger.info("TFLint config file changed, re-initializing...");
       await this.init(this.config!);
     });
 
     watcher.onDidDelete(() => {
-      logger.debug("TFLint config file deleted");
+      logger.info("TFLint config file deleted");
       this.config!.configFilePath = undefined;
     });
 
     // in the event that the config file is created again
     watcher.onDidCreate(async (uri) => {
-      logger.debug("TFLint config file created, re-initializing...");
+      logger.info("TFLint config file created, re-initializing...");
       this.config!.configFilePath = uri.fsPath;
       await this.init(this.config!);
     });
@@ -106,7 +106,7 @@ class Linter {
 
   private executeTFLint(cmd: string): Promise<TFLintResult> {
     return new Promise((resolve, reject) => {
-      logger.debug(`Executing: ${cmd}`);
+      logger.info(`Executing: ${cmd}`);
       exec(cmd, { maxBuffer: 10 * 1024 * 1024 }, (err, stdout) => {
         if (err) {
           reject(err);
@@ -117,7 +117,7 @@ class Linter {
           const result: TFLintResult = JSON.parse(stdout);
           resolve(result);
         } catch (e) {
-          logger.error("[TFLint] JSON parse error:", e);
+          logger.error("JSON parse error:", e);
           reject(e);
         }
       });

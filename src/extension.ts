@@ -16,7 +16,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(async (event) => {
       if (event.affectsConfiguration("tflint-vscode")) {
-        logger.debug("Reloading configuration");
+        logger.info("Config changed: Reloading configuration");
         config = await loadConfig();
         linter.init(config);
       }

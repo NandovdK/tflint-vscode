@@ -6,28 +6,23 @@ class Logger {
 
   error(...messages: unknown[]): void {
     console.log(...messages);
-    this.channel.appendLine(util.format(...messages));
-    //this.channel.error(util.format(...messages));
+    this.channel.error(util.format(...messages));
   }
   info(...messages: unknown[]): void {
     console.log(...messages);
-    this.channel.appendLine(util.format(...messages));
-    //this.channel.info(util.format(...messages));
+    this.channel.info(util.format(...messages));
   }
   warn(...messages: unknown[]): void {
     console.log(...messages);
-    this.channel.appendLine(util.format(...messages));
-    //this.channel.warn(util.format(...messages));
+    this.channel.warn(util.format(...messages));
   }
   debug(...messages: unknown[]): void {
     console.log(...messages);
-    this.channel.appendLine(util.format(...messages));
-    //this.channel.debug(util.format(...messages));
+    this.channel.debug(util.format(...messages));
   }
   trace(...messages: unknown[]): void {
     console.log(...messages);
-    this.channel.appendLine(util.format(...messages));
-    //this.channel.trace(util.format(...messages));
+    this.channel.trace(util.format(...messages));
   }
 }
 
