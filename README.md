@@ -4,6 +4,10 @@
 
 **Note!** This extension is currently not shipped with a TFLint bin. Please make sure TFLint is installed in your $PATH, or optionally configured in vscode settings.
 
+## Highlights
+
+![Demo](assets/demo.gif)
+
 ## Features
 
 - Runs **TFLint** on Terraform files (`.tf`) in your workspace.
